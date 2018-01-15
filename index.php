@@ -50,6 +50,11 @@
           </p>
           <p class="control">
             <button type="submit" class="button is-medium">
+
+              <i class="fa fa-spinner fa-spin fa-fw" id="loading" style="display: none;">
+                <span class="sr-only">Loading...</span>
+              </i>
+
               Search
             </button>
           </p>
@@ -66,6 +71,10 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 
   <script type="text/javascript">
+    var GRAPH = null;
+    var form = document.getElementById('form--search');
+    var loading = document.getElementById('loading');
+
     var onReadyForStats = function(items) {
       var data = [];
       var result = [];
@@ -122,11 +131,11 @@
 
       items.forEach( function(item) {
         if (item.hour < 9) {
-          labels.push( '0' + item.hour);
+          labels.push( '0' + item.hour + ':00');
         } else {
-          labels.push(item.hour);
+          labels.push(item.hour + ':00');
         }
-        
+
         post.push(item.post);
       });
 
@@ -177,19 +186,27 @@
               }
           };
 
-          new Chart(ctx, config);
+      if (GRAPH) {
+        GRAPH.destroy();
+        GRAPH = null;
+      }
+
+      GRAPH = new Chart(ctx, config);
     };
 
     var onSearchTweet = function(e) {
       var name = document.getElementById('screenName').value;
+      loading.style.display = 'block';
 
       axios.get('/tweets.php?user=' + name).then( function(response) {
+        loading.style.display = 'none';
         var data = response.data;
         var stats = onReadyForStats(response.data);
 
         onPublishHistogram(stats);
 
       }).catch( function(error) {
+        loading.style.display = 'none';
         console.log(error);
         alert('Something went wrong. Please try again');
       });
@@ -200,8 +217,6 @@
     window.randomScalingFactor = function() {
       return Math.round(Math.random(-100, 100));
     };
-
-    var form = document.getElementById('form--search');
 
     if (form) {
       form.addEventListener('submit', onSearchTweet)
