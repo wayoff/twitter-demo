@@ -1,0 +1,6 @@
+{
+    "name": "marksuner/twitter-demo",
+    "require": {
+        "abraham/twitteroauth": "^0.7.4"
+    }
+}
